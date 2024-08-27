@@ -161,7 +161,6 @@ public class SisuDiBridgeModule extends AbstractModule {
                             ? null
                             : (Class<Object>) (clazz.getInterfaces().length > 0 ? clazz.getInterfaces()[0] : clazz));
                     if (itf != null) {
-                        System.err.println("Bridging " + key);
                         AnnotatedBindingBuilder<Object> binder = bind(itf);
                         if (key.getQualifier() instanceof String s && !s.isEmpty()) {
                             binder.annotatedWith(Names.named(s));
