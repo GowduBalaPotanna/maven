@@ -22,13 +22,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import org.apache.maven.api.services.Lookup;
 import org.apache.maven.api.spi.PropertyContributor;
 import org.apache.maven.execution.MavenExecutionRequest;
+import org.apache.maven.internal.impl.DefaultProtoSession;
+import org.apache.maven.internal.impl.DefaultProtoSessionFactory;
 
 /**
  * Extender that manages {@link PropertyContributor}.
@@ -39,24 +40,36 @@ import org.apache.maven.execution.MavenExecutionRequest;
 @Singleton
 class PropertyContributorExtender implements MavenExecutionRequestExtender {
     private final Lookup lookup;
+    private final DefaultProtoSessionFactory protoSessionFactory;
 
     @Inject
-    PropertyContributorExtender(Lookup lookup) {
+    PropertyContributorExtender(Lookup lookup, DefaultProtoSessionFactory protoSessionFactory) {
         this.lookup = lookup;
+        this.protoSessionFactory = protoSessionFactory;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public void extend(MavenExecutionRequest mavenExecutionRequest) {
         Map<String, PropertyContributor> effectivePropertyContributors = lookup.lookupMap(PropertyContributor.class);
         if (!effectivePropertyContributors.isEmpty()) {
-            HashMap<String, String> userPropertiesMap = new HashMap<>((Map) mavenExecutionRequest.getUserProperties());
+            DefaultProtoSession protoSession = protoSessionFactory.from(mavenExecutionRequest);
+
+            int contributedProperties = 0;
             for (PropertyContributor contributor : effectivePropertyContributors.values()) {
-                contributor.contribute(userPropertiesMap);
+                Map<String, String> contribution = contributor.contribute(protoSession);
+                if (contribution != null && !contribution.isEmpty()) {
+                    contributedProperties += contribution.size();
+                    protoSession = protoSession.toBuilder()
+                            .putAllUserProperties(contribution)
+                            .build();
+                }
             }
-            Properties newProperties = new Properties();
-            newProperties.putAll(userPropertiesMap);
-            mavenExecutionRequest.setUserProperties(newProperties);
+
+            if (contributedProperties > 0) {
+                Properties userProperties = new Properties();
+                userProperties.putAll(protoSession.getUserProperties());
+                mavenExecutionRequest.setUserProperties(userProperties);
+            }
         }
     }
 }

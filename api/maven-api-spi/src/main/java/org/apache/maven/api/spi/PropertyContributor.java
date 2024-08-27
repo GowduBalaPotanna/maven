@@ -20,6 +20,7 @@ package org.apache.maven.api.spi;
 
 import java.util.Map;
 
+import org.apache.maven.api.ProtoSession;
 import org.apache.maven.api.annotations.Consumer;
 import org.apache.maven.api.annotations.Experimental;
 
@@ -33,9 +34,9 @@ import org.apache.maven.api.annotations.Experimental;
 @Consumer
 public interface PropertyContributor extends SpiService {
     /**
-     * Invoked just before session is created with a mutable map that carries collected user properties so far.
+     * Invoked just before session is created.
      *
-     * @param userProperties The mutable user properties, never {@code null}.
+     * @param protoSession the proto-session, never {@code null}.
      */
-    void contribute(Map<String, String> userProperties);
+    Map<String, String> contribute(ProtoSession protoSession);
 }
