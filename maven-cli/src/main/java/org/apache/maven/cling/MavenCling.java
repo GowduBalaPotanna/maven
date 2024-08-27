@@ -32,6 +32,8 @@ import org.apache.maven.cli.MavenCli;
 import org.apache.maven.cling.support.MavenClingSupport;
 import org.codehaus.plexus.classworlds.ClassWorld;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Maven CLI "new-gen".
  */
@@ -40,15 +42,28 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
      * "Normal" Java entry point. Note: Maven uses ClassWorld Launcher and this entry point is NOT used!
      */
     public static void main(String[] args) {
-        System.exit(main(
-                args, new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader())));
+        System.exit(main(args, createClassWorld()));
     }
 
     /**
      * ClassWorld Launcher entry point.
      */
     public static int main(String[] args, ClassWorld world) {
-        return new MavenCling().run(world, args);
+        return new MavenCling(world).run(args);
+    }
+
+    private static ClassWorld createClassWorld() {
+        return new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader());
+    }
+
+    private final ClassWorld classWorld;
+
+    public MavenCling() {
+        this(createClassWorld());
+    }
+
+    public MavenCling(ClassWorld classWorld) {
+        this.classWorld = requireNonNull(classWorld);
     }
 
     @Override
@@ -58,7 +73,7 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
 
     @Override
     public int run(InputStream in, OutputStream out, OutputStream err, String... arguments) {
-        return run(new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader()), arguments);
+        return run(arguments);
     }
 
     @Override
@@ -72,7 +87,7 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
     }
 
     @Override
-    protected int doRun(ClassWorld classWorld, MavenClingOptions options, Consumer<PrintStream> usage, String... args) {
+    protected int doRun(MavenClingOptions options, Consumer<PrintStream> usage, String... args) {
         if (options.isLegacyCli()) {
             return MavenCli.main(args, classWorld); // just delegate it
         } else if (options.isShowVersionAndExit()) {

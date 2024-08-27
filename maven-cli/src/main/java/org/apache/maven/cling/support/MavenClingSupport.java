@@ -21,7 +21,6 @@ package org.apache.maven.cling.support;
 import java.io.PrintStream;
 import java.util.function.Consumer;
 
-import org.codehaus.plexus.classworlds.ClassWorld;
 import picocli.CommandLine;
 
 /**
@@ -32,7 +31,7 @@ import picocli.CommandLine;
 public abstract class MavenClingSupport<O extends MavenOptionsSupport> {
     protected static final String CORE_CLASS_REALM_ID = "plexus.core";
 
-    public int run(ClassWorld classWorld, String... args) {
+    public int run(String... args) {
         O mavenOptions = getMavenOptions();
         CommandLine commandLine = new CommandLine(mavenOptions).setCommandName(name());
         try {
@@ -42,12 +41,12 @@ public abstract class MavenClingSupport<O extends MavenOptionsSupport> {
             commandLine.usage(System.out);
             return 1;
         }
-        return doRun(classWorld, mavenOptions, commandLine::usage, args);
+        return doRun(mavenOptions, commandLine::usage, args);
     }
 
     public abstract String name();
 
     protected abstract O getMavenOptions();
 
-    protected abstract int doRun(ClassWorld classWorld, O mavenOptions, Consumer<PrintStream> usage, String... args);
+    protected abstract int doRun(O mavenOptions, Consumer<PrintStream> usage, String... args);
 }
