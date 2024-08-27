@@ -18,15 +18,15 @@
  */
 package org.apache.maven.cling;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * Maven CLI options.
- * <p>
- * Note: we do not use File type here as it is yet too early (we have not determined yet base to resolve against).
+ * Apache Maven CLI options.
  */
 public class MavenOptions {
     @Option(
@@ -40,7 +40,7 @@ public class MavenOptions {
             arity = "1",
             paramLabel = "<file>",
             description = "Force the use of an alternate POM file (or directory with pom.xml)")
-    protected String alternatePomFile;
+    protected Path alternatePomFile;
 
     @Option(
             names = {"-D", "--define"},
@@ -59,7 +59,7 @@ public class MavenOptions {
             names = {"-v", "--version"},
             arity = "0",
             description = "Display version information and exit")
-    protected boolean version;
+    protected boolean showVersionAndExit;
 
     @Option(
             names = {"-q", "--quiet"},
@@ -137,49 +137,51 @@ public class MavenOptions {
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the user settings file")
-    protected String altUserSettings;
+    protected Path altUserSettings;
 
     @Option(
             names = {"-ps", "--project-settings"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the project settings file")
-    protected String altProjectSettings;
+    protected Path altProjectSettings;
 
+    @Deprecated
     @Option(
             names = {"-gs", "--global-settings"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the global settings file")
-    protected String altGlobalSettings;
+    protected Path altGlobalSettings;
 
     @Option(
             names = {"-is", "--install-settings"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the installation settings file")
-    protected String altInstallationSettings;
+    protected Path altInstallationSettings;
 
     @Option(
             names = {"-t", "--toolchains"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the user toolchains file")
-    protected String altUserToolchains;
+    protected Path altUserToolchains;
 
+    @Deprecated
     @Option(
             names = {"-gt", "--global-toolchains"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the global toolchains file")
-    protected String altGlobalToolchains;
+    protected Path altGlobalToolchains;
 
     @Option(
             names = {"-it", "--install-toolchains"},
             arity = "1",
             paramLabel = "<file>",
             description = "Alternate path for the installation toolchains file")
-    protected String altInstallationToolchains;
+    protected Path altInstallationToolchains;
 
     public enum FailOnSeverityOption {
         warn, error
@@ -252,7 +254,7 @@ public class MavenOptions {
             arity = "1",
             paramLabel = "<file>",
             description = "Log file where all build output will go (disables output color)")
-    protected String logFile;
+    protected Path logFile;
 
     @Option(
             names = {"-V", "--show-version"},
@@ -307,8 +309,178 @@ public class MavenOptions {
             names = {"-itr", "--ignore-transitive-repositories"},
             arity = "0",
             description = "If set, Maven will ignore remote repositories introduced by transitive dependencies")
-    boolean ignoreTransitiveRepositories;
+    protected boolean ignoreTransitiveRepositories;
 
-    @Parameters(paramLabel = "GOALS", description = "List of phases and/or goals")
-    List<String> goals;
+    @Parameters(paramLabel = "GOALS", arity = "0..*", description = "List of phases and/or goals")
+    protected List<String> goals;
+
+    public boolean isHelp() {
+        return help;
+    }
+
+    public Optional<Path> getAlternatePomFile() {
+        return Optional.ofNullable(alternatePomFile);
+    }
+
+    public Optional<List<String>> getUserProperties() {
+        return Optional.ofNullable(userProperties);
+    }
+
+    public boolean isOffline() {
+        return offline;
+    }
+
+    public boolean isShowVersionAndExit() {
+        return showVersionAndExit;
+    }
+
+    public boolean isQuiet() {
+        return quiet;
+    }
+
+    public boolean isVerbose() {
+        return verbose;
+    }
+
+    public boolean isErrors() {
+        return errors;
+    }
+
+    public boolean isNonRecursive() {
+        return nonRecursive;
+    }
+
+    public boolean isUpdateSnapshots() {
+        return updateSnapshots;
+    }
+
+    public Optional<List<String>> getActivatedProfiles() {
+        return Optional.ofNullable(activatedProfiles);
+    }
+
+    public boolean isNonInteractive() {
+        return nonInteractive;
+    }
+
+    public boolean isForceInteractive() {
+        return forceInteractive;
+    }
+
+    public boolean isSuppressSnapshotUpdates() {
+        return suppressSnapshotUpdates;
+    }
+
+    public boolean isStrictChecksums() {
+        return strictChecksums;
+    }
+
+    public boolean isRelaxedChecksums() {
+        return relaxedChecksums;
+    }
+
+    public Optional<Path> getAltUserSettings() {
+        return Optional.ofNullable(altUserSettings);
+    }
+
+    public Optional<Path> getAltProjectSettings() {
+        return Optional.ofNullable(altProjectSettings);
+    }
+
+    @Deprecated
+    public Optional<Path> getAltGlobalSettings() {
+        return Optional.ofNullable(altGlobalSettings);
+    }
+
+    public Optional<Path> getAltInstallationSettings() {
+        return Optional.ofNullable(altInstallationSettings);
+    }
+
+    public Optional<Path> getAltUserToolchains() {
+        return Optional.ofNullable(altUserToolchains);
+    }
+
+    @Deprecated
+    public Optional<Path> getAltGlobalToolchains() {
+        return Optional.ofNullable(altGlobalToolchains);
+    }
+
+    public Optional<Path> getAltInstallationToolchains() {
+        return Optional.ofNullable(altInstallationToolchains);
+    }
+
+    public Optional<FailOnSeverityOption> getFailOnSeverity() {
+        return Optional.ofNullable(failOnSeverity);
+    }
+
+    public boolean isFailFast() {
+        return failFast;
+    }
+
+    public boolean isFailAtEnd() {
+        return failAtEnd;
+    }
+
+    public boolean isFailNever() {
+        return failNever;
+    }
+
+    public boolean isResume() {
+        return resume;
+    }
+
+    public Optional<String> getResumeFrom() {
+        return Optional.ofNullable(resumeFrom);
+    }
+
+    public Optional<List<String>> getProjects() {
+        return Optional.ofNullable(projects);
+    }
+
+    public Optional<List<String>> getAlsoMake() {
+        return Optional.ofNullable(alsoMake);
+    }
+
+    public boolean isAlsoMakeDependents() {
+        return alsoMakeDependents;
+    }
+
+    public Optional<Path> getLogFile() {
+        return Optional.ofNullable(logFile);
+    }
+
+    public boolean isShowVersion() {
+        return showVersion;
+    }
+
+    public Optional<String> getThreads() {
+        return Optional.ofNullable(threads);
+    }
+
+    public Optional<String> getBuilder() {
+        return Optional.ofNullable(builder);
+    }
+
+    public boolean isNoTransferProgress() {
+        return noTransferProgress;
+    }
+
+    public Optional<ColorOption> getColor() {
+        return Optional.ofNullable(color);
+    }
+
+    public boolean isCacheArtifactNotFound() {
+        return cacheArtifactNotFound;
+    }
+
+    public boolean isStrictArtifactDescriptorPolicy() {
+        return strictArtifactDescriptorPolicy;
+    }
+
+    public boolean isIgnoreTransitiveRepositories() {
+        return ignoreTransitiveRepositories;
+    }
+
+    public List<String> getGoals() {
+        return goals;
+    }
 }
