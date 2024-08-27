@@ -18,7 +18,13 @@
  */
 package org.apache.maven.cling.support;
 
+import javax.lang.model.SourceVersion;
+import javax.tools.Tool;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import picocli.CommandLine;
@@ -28,8 +34,21 @@ import picocli.CommandLine;
  *
  * @param <O> The options type.
  */
-public abstract class MavenClingSupport<O extends MavenOptionsSupport> {
+public abstract class MavenClingSupport<O extends MavenOptionsSupport> implements Tool {
     protected static final String CORE_CLASS_REALM_ID = "plexus.core";
+
+    @Override
+    public abstract String name();
+
+    @Override
+    public int run(InputStream in, OutputStream out, OutputStream err, String... arguments) {
+        return run(arguments);
+    }
+
+    @Override
+    public Set<SourceVersion> getSourceVersions() {
+        return Set.of(SourceVersion.latestSupported());
+    }
 
     public int run(String... args) {
         O mavenOptions = getMavenOptions();
@@ -43,8 +62,6 @@ public abstract class MavenClingSupport<O extends MavenOptionsSupport> {
         }
         return doRun(mavenOptions, commandLine::usage, args);
     }
-
-    public abstract String name();
 
     protected abstract O getMavenOptions();
 

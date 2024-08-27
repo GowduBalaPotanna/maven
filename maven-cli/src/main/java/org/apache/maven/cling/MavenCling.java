@@ -18,14 +18,10 @@
  */
 package org.apache.maven.cling;
 
-import javax.lang.model.SourceVersion;
 import javax.tools.Tool;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import org.apache.maven.cli.MavenCli;
@@ -72,16 +68,6 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
     }
 
     @Override
-    public int run(InputStream in, OutputStream out, OutputStream err, String... arguments) {
-        return run(arguments);
-    }
-
-    @Override
-    public Set<SourceVersion> getSourceVersions() {
-        return Set.of(SourceVersion.latestSupported());
-    }
-
-    @Override
     protected MavenClingOptions getMavenOptions() {
         return new MavenClingOptions();
     }
@@ -90,15 +76,16 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
     protected int doRun(MavenClingOptions options, Consumer<PrintStream> usage, String... args) {
         if (options.isLegacyCli()) {
             return MavenCli.main(args, classWorld); // just delegate it
-        } else if (options.isShowVersionAndExit()) {
-            System.out.println("Version XXX");
         } else {
-            if (options.getGoals().orElseGet(Collections::emptyList).isEmpty()) {
+            if (options.isShowVersionAndExit()) {
+                System.out.println("Version XXX");
+                return 0;
+            } else if (options.getGoals().orElseGet(Collections::emptyList).isEmpty()) {
                 usage.accept(System.out);
                 return 1;
             }
             System.out.println("Hello world!");
+            return 0;
         }
-        return 0;
     }
 }
