@@ -31,7 +31,7 @@ public class MavenClingOptions extends MavenOptionsSupport {
      */
     @Experimental
     @Option(
-            names = {"-lc", "--legacy-cli"},
+            names = {"--legacy-cli"},
             arity = "0",
             description = "Use legacy CLI")
     protected boolean legacyCli;

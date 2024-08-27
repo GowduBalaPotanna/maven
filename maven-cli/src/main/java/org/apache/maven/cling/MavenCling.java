@@ -21,6 +21,7 @@ package org.apache.maven.cling;
 import javax.tools.Tool;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.function.Consumer;
 
@@ -76,7 +77,10 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
     @Override
     protected int doRun(MavenClingOptions options, Consumer<PrintStream> usage, String... args) {
         if (options.isLegacyCli()) {
-            return MavenCli.main(args, classWorld); // just delegate it
+            // just delegate it: but filter out one command legacy does not know
+            // TODO: how to not duplicate string literal here?
+            return MavenCli.main(
+                    Arrays.stream(args).filter(a -> !a.equals("--legacy-cli")).toArray(String[]::new), classWorld);
         } else {
             if (options.isShowVersionAndExit()) {
                 if (options.isQuiet()) {
