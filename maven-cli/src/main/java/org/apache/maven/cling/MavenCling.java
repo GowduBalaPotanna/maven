@@ -23,20 +23,19 @@ import javax.tools.Tool;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.Collections;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.apache.maven.cli.MavenCli;
+import org.apache.maven.cling.support.MavenClingSupport;
 import org.codehaus.plexus.classworlds.ClassWorld;
-import picocli.CommandLine;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * Maven CLI "new-gen".
  */
-public class MavenCling implements Tool {
-    private static final String CORE_CLASS_REALM_ID = "plexus.core";
-
+public class MavenCling extends MavenClingSupport<MavenClingOptions> implements Tool {
     /**
      * "Normal" Java entry point. Note: Maven uses ClassWorld Launcher and this entry point is NOT used!
      */
@@ -49,14 +48,17 @@ public class MavenCling implements Tool {
      * ClassWorld Launcher entry point.
      */
     public static int main(String[] args, ClassWorld world) {
-        return new MavenCling().run(args, world);
+        return new MavenCling().run(world, args);
+    }
+
+    @Override
+    public String name() {
+        return "mvn";
     }
 
     @Override
     public int run(InputStream in, OutputStream out, OutputStream err, String... arguments) {
-        return run(
-                arguments,
-                new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader()));
+        return run(new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader()), arguments);
     }
 
     @Override
@@ -65,41 +67,23 @@ public class MavenCling implements Tool {
     }
 
     @Override
-    public String name() {
-        return "mvn";
+    protected MavenClingOptions getMavenOptions() {
+        return new MavenClingOptions();
     }
 
-    protected MavenOptions getMavenOptions() {
-        return new MavenOptions();
-    }
-
-    public int run(String[] args, ClassWorld classWorld) {
-        requireNonNull(args);
-        requireNonNull(classWorld);
-        MavenOptions mavenOptions = getMavenOptions();
-        CommandLine commandLine = new CommandLine(mavenOptions).setCommandName(name());
-        boolean legacyCli = false;
-        boolean help = false;
-        boolean showVersionAndExit = false;
-        try {
-            commandLine.parseArgs(args);
-            legacyCli = mavenOptions.isLegacyCli();
-            help = mavenOptions.isHelp();
-            showVersionAndExit = mavenOptions.isShowVersionAndExit();
-        } catch (CommandLine.ParameterException e) {
-            help = true;
-            System.err.println("Bad CLI arguments: " + e.getMessage());
-        }
-        int exitCode = 0;
-        if (legacyCli) {
-            exitCode = MavenCli.main(args, classWorld);
-        } else if (help || mavenOptions.getGoals().isEmpty()) {
-            commandLine.usage(System.out);
-        } else if (showVersionAndExit) {
+    @Override
+    protected int doRun(ClassWorld classWorld, MavenClingOptions options, Consumer<PrintStream> usage, String... args) {
+        if (options.isLegacyCli()) {
+            return MavenCli.main(args, classWorld); // just delegate it
+        } else if (options.isShowVersionAndExit()) {
             System.out.println("Version XXX");
         } else {
+            if (options.getGoals().orElseGet(Collections::emptyList).isEmpty()) {
+                usage.accept(System.out);
+                return 1;
+            }
             System.out.println("Hello world!");
         }
-        return exitCode;
+        return 0;
     }
 }

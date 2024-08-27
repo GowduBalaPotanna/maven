@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package org.apache.maven.cling;
+package org.apache.maven.cling.support;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,15 +27,9 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * Apache Maven CLI options.
+ * Generic Apache Maven CLI options.
  */
-public class MavenOptions {
-    @Option(
-            names = {"-lc", "--legacy-cli"},
-            arity = "0",
-            description = "Use legacy CLI")
-    protected boolean legacyCli;
-
+public class MavenOptionsSupport {
     @Option(
             names = {"-h", "--help"},
             arity = "0",
@@ -324,14 +319,6 @@ public class MavenOptions {
     @Parameters(paramLabel = "GOALS", arity = "0..*", description = "List of phases and/or goals")
     protected List<String> goals;
 
-    public boolean isLegacyCli() {
-        return legacyCli;
-    }
-
-    public void setLegacyCli(boolean legacyCli) {
-        this.legacyCli = legacyCli;
-    }
-
     public boolean isHelp() {
         return help;
     }
@@ -500,5 +487,13 @@ public class MavenOptions {
 
     public Optional<List<String>> getGoals() {
         return Optional.ofNullable(goals);
+    }
+
+    // --
+
+    public boolean showUsageAndExit() {
+        return isHelp()
+                || isShowVersionAndExit()
+                || getGoals().orElseGet(Collections::emptyList).isEmpty();
     }
 }
