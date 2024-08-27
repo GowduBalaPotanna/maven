@@ -19,6 +19,7 @@
 package org.apache.maven.cling;
 
 import org.codehaus.plexus.classworlds.ClassWorld;
+import picocli.CommandLine;
 
 /**
  * Maven CLI "new-gen".
@@ -30,7 +31,6 @@ public class MavenCling {
      * "Normal" Java entry point. Note: Maven uses ClassWorld Launcher and this entry point is NOT used!
      */
     public static void main(String[] args) {
-        System.out.println("fix me!");
         main(args, new ClassWorld(CORE_CLASS_REALM_ID, Thread.currentThread().getContextClassLoader()));
     }
 
@@ -38,6 +38,12 @@ public class MavenCling {
      * ClassWorld Launcher entry point.
      */
     public static void main(String[] args, ClassWorld world) {
-        System.out.println("Hello world!");
+        MavenOptions options = new MavenOptions();
+        new CommandLine(options).parseArgs(args);
+        if (options.help) {
+            new CommandLine(options).usage(System.out);
+        } else {
+            System.out.println("Hello world!");
+        }
     }
 }
