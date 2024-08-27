@@ -30,6 +30,12 @@ import picocli.CommandLine.Parameters;
  */
 public class MavenOptions {
     @Option(
+            names = {"-lc", "--legacy-cli"},
+            arity = "0",
+            description = "Use legacy CLI")
+    protected boolean legacyCli;
+
+    @Option(
             names = {"-h", "--help"},
             arity = "0",
             description = "Display help information")
@@ -184,14 +190,16 @@ public class MavenOptions {
     protected Path altInstallationToolchains;
 
     public enum FailOnSeverityOption {
-        warn, error
+        warn,
+        error
     }
 
     @Option(
             names = {"-fos", "--fail-on-severity"},
             arity = "1",
             paramLabel = "<severity>",
-            description = "Configure which severity of logging should cause the build to fail. Supported values are 'warn' and 'error'")
+            description =
+                    "Configure which severity of logging should cause the build to fail. Supported values are 'warn' and 'error'")
     protected FailOnSeverityOption failOnSeverity;
 
     @Option(
@@ -281,7 +289,9 @@ public class MavenOptions {
     protected boolean noTransferProgress;
 
     public enum ColorOption {
-        auto, always, never
+        auto,
+        always,
+        never
     }
 
     @Option(
@@ -313,6 +323,14 @@ public class MavenOptions {
 
     @Parameters(paramLabel = "GOALS", arity = "0..*", description = "List of phases and/or goals")
     protected List<String> goals;
+
+    public boolean isLegacyCli() {
+        return legacyCli;
+    }
+
+    public void setLegacyCli(boolean legacyCli) {
+        this.legacyCli = legacyCli;
+    }
 
     public boolean isHelp() {
         return help;
@@ -480,7 +498,7 @@ public class MavenOptions {
         return ignoreTransitiveRepositories;
     }
 
-    public List<String> getGoals() {
-        return goals;
+    public Optional<List<String>> getGoals() {
+        return Optional.ofNullable(goals);
     }
 }
