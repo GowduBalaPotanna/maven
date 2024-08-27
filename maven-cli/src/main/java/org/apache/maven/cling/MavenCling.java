@@ -21,6 +21,8 @@ package org.apache.maven.cling;
 import org.codehaus.plexus.classworlds.ClassWorld;
 import picocli.CommandLine;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Maven CLI "new-gen".
  */
@@ -38,10 +40,38 @@ public class MavenCling {
      * ClassWorld Launcher entry point.
      */
     public static void main(String[] args, ClassWorld world) {
-        MavenOptions options = new MavenOptions();
-        new CommandLine(options).parseArgs(args);
-        if (options.help) {
-            new CommandLine(options).usage(System.out);
+        new MavenCling(args, world).run();
+    }
+
+    private final String[] args;
+    private final ClassWorld classWorld;
+    private final MavenOptions mavenOptions;
+    private final CommandLine commandLine;
+
+    public MavenCling(String[] args, ClassWorld classWorld) {
+        this.args = requireNonNull(args);
+        this.classWorld = requireNonNull(classWorld);
+        this.mavenOptions = getMavenOptions();
+        this.commandLine = new CommandLine(this.mavenOptions).setCommandName(getCommandName());
+    }
+
+    protected MavenOptions getMavenOptions() {
+        return new MavenOptions();
+    }
+
+    protected String getCommandName() {
+        return "mvn";
+    }
+
+    public void run() {
+        try {
+            commandLine.parseArgs(args);
+        } catch (CommandLine.ParameterException e) {
+            mavenOptions.help = true;
+            System.err.println("Bad CLI arguments: " + e.getMessage());
+        }
+        if (mavenOptions.help) {
+            commandLine.usage(System.out);
         } else {
             System.out.println("Hello world!");
         }
