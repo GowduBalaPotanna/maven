@@ -24,6 +24,7 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.function.Consumer;
 
+import org.apache.maven.cli.CLIReportingUtils;
 import org.apache.maven.cli.MavenCli;
 import org.apache.maven.cling.support.MavenClingSupport;
 import org.codehaus.plexus.classworlds.ClassWorld;
@@ -78,9 +79,14 @@ public class MavenCling extends MavenClingSupport<MavenClingOptions> implements 
             return MavenCli.main(args, classWorld); // just delegate it
         } else {
             if (options.isShowVersionAndExit()) {
-                System.out.println("Version XXX");
+                if (options.isQuiet()) {
+                    System.out.println(CLIReportingUtils.showVersionMinimal());
+                } else {
+                    System.out.println(CLIReportingUtils.showVersion());
+                }
                 return 0;
             } else if (options.getGoals().orElseGet(Collections::emptyList).isEmpty()) {
+                System.err.println("No goals specified!");
                 usage.accept(System.out);
                 return 1;
             }

@@ -19,7 +19,6 @@
 package org.apache.maven.cling.support;
 
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -293,7 +292,7 @@ public class MavenOptionsSupport {
             names = {"--color"},
             arity = "1",
             description = "Defines the color mode of the output. Supported are 'auto', 'always', 'never'")
-    protected ColorOption color = ColorOption.auto;
+    protected ColorOption color;
 
     @Option(
             names = {"-canf", "--cache-artifact-not-found"},
@@ -487,13 +486,5 @@ public class MavenOptionsSupport {
 
     public Optional<List<String>> getGoals() {
         return Optional.ofNullable(goals);
-    }
-
-    // --
-
-    public boolean showUsageAndExit() {
-        return isHelp()
-                || isShowVersionAndExit()
-                || getGoals().orElseGet(Collections::emptyList).isEmpty();
     }
 }
